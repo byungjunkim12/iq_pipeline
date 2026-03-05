@@ -12,15 +12,17 @@ private:
     size_t size_;
     std::mutex mutex_;
     std::condition_variable cv_;
+    bool done_ = false;
 
 public:
-    IQQueue(size_t capacity) : capacity_(capacity), size_(0) { buffer_ = std::make_unique<T[]>(capacity_); } 
-    IQQueue(IQQueue&& other) noexcept :
+    IQQueue(size_t capacity) : capacity_(capacity), size_(0) { buffer_ = std::make_unique<T[]>(capacity_); }
+    
+    IQQueue(IQQueue&& other) noexcept : 
         capacity_(other.capacity_),
-        size_(other.size_),
-        buffer_(std::move(other.buffer_)) {
-        other.capacity_ = 0;
+        size_(other.size_){
+        buffer_ = std::move(other.buffer_);
         other.size_ = 0;
+        other.capacity_ = 0;
     }
 
     void push(const T& item) {
@@ -39,10 +41,21 @@ public:
 
     T pop() {
         std::unique_lock<std::mutex> lock(mutex_);
-        cv_.wait(lock, [this] { return !empty(); });
-        return buffer_[--size_];
+        cv_.wait(lock, [this] { return size_ > 0 || done_; });
+        if (empty()) return T{};
+        T item = buffer_[--size_];
+        cv_.notify_one();
+        return item;
     }
     
     bool empty() const { return (size_ == 0); };
+    
+    void set_done() {
+        std::unique_lock<std::mutex> lock(mutex_);
+        done_ = true;
+        cv_.notify_all();
+    }
+    
+    bool is_done() { return done_; }
 };
 
