@@ -46,15 +46,15 @@ public:
         cv_.notify_one();
     }
 
-    T pop() {
+    bool pop(T& item) {
         std::unique_lock<std::mutex> lock(mutex_);
         cv_.wait(lock, [this] { return size_ > 0 || done_; });
-        if (empty()) return T{};
-        T item = buffer_[head_];
+        if (empty()) return false;
+        item = buffer_[head_];
         head_ = (head_ + 1) % capacity_;
         size_--;
         cv_.notify_one();
-        return item;
+        return true;
     }
     
     bool empty() const { return (size_ == 0); };
