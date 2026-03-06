@@ -1,11 +1,11 @@
 #include <iostream>
-#include <mutex>
+#include <complex>
+#include <thread>
 #include "queue.h"
 
-void consumer(IQQueue<std::complex<float>>& queue, int num_samples){
-    int count = 0;
+void consumer(IQQueue<std::complex<float>>& queue) {
     std::complex<float> item;
-    while (queue.pop(item)){
+    while (queue.pop(item)) {
         std::cout << "consumed: " << item << "\n";
     }
 }
