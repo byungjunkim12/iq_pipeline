@@ -1,45 +1,34 @@
 #include <gtest/gtest.h>
-#include "queue.h"
 #include <complex>
+#include "queue.h"
 
-TEST(IQQueueTest, PushPopReturnsSameValue) {
+TEST(IQQueueTest, TEST12) {
     IQQueue<std::complex<float>> queue(10);
-    std::complex<float> a{1.0, 2.0};
-    queue.push(a);
-    std::complex<float> b;
-    queue.pop(b);
-    EXPECT_EQ(a, b);
-}
-
-TEST(IQQueueTest, EmptyAfterPushPop) {
-    IQQueue<std::complex<float>> queue(10);
-    std::complex<float> a{1.0, 2.0};
-    queue.push(a);
-    queue.pop(a);
+    std::complex<float> c0{1.0f, 2.0f};
+    std::complex<float> c1;
+    queue.push(c0);
+    queue.pop(c1);
+    EXPECT_EQ(c0, c1);
     EXPECT_TRUE(queue.empty());
 }
 
 TEST(IQQueueTest, FIFOOrdering) {
     IQQueue<std::complex<float>> queue(10);
-    std::vector<std::complex<float>> c_vec{
-        {1.0, 2.0},
-        {2.0, 3.0},
-        {3.0, 4.0}};
-        
-    for (int i = 0; i < 3; i++)
-        queue.push(c_vec[i]);
-    
+    std::vector<std::complex<float>> c_vec = {
+        {1.0f, 2.0f},
+        {2.0f, 3.0f},
+        {3.0f, 4.0f}};
     for (int i = 0; i < 3; i++){
-        std::complex<float> b;
-        queue.pop(b);
-        EXPECT_EQ(c_vec[i], b);
+        queue.push(c_vec[i]);
     }
-}
     
-TEST(IQQueueTest, SetDoneReturnsFalse){ 
-    IQQueue<std::complex<float>> queue(10);
-    std::complex<float> a;
+    std::complex<float> c;
+    for (int i = 0; i < 3; i++) {
+        queue.pop(c);
+        EXPECT_EQ(c_vec[i], c);
+    }
+    
     queue.set_done();
-    EXPECT_FALSE(queue.pop(a));
+    EXPECT_FALSE(queue.pop(c));
 }
 
